@@ -99,20 +99,27 @@ EnjoyTrip RestAPI 프로젝트
 `/api/board/info/{boardNo}`|GET|`{}`|특정 게시글(no) 조회
 `/api/board/write`|POST|`{"title": "제목", "contents": "내용"}`|게시글 작성
 `/api/board/delete/{boardNo}`|GET|`{}`|게시글 삭제 시간 등록(UPDATE)
-`/api/board/update/{boardNo}`|POST|`{"title": "제목 수정", "contents": "내용 수정"}`|게시글 수정, 수정 시간 등록
+`/api/board/update/{boardNo}`|PUT|`{"title": "제목 수정", "contents": "내용 수정"}`|게시글 수정, 수정 시간 등록
 `/api/board/getattraction/{userNo}`|GET|`{}`|유저 no에 맞는 share_att 조회
 
 #### 17. `/api/board/list` - GET
+![image](https://user-images.githubusercontent.com/93763809/235716440-17a636c4-ebb4-425b-8ed8-f8ba0626595f.png)
 
 #### 18. `/api/board/info/{boardNo}` - GET
+![image](https://user-images.githubusercontent.com/93763809/235716512-72dfd647-4068-4203-ac83-c3116dcd4ed3.png)
 
 #### 19. `/api/board/write` - POST
+![image](https://user-images.githubusercontent.com/93763809/235715890-a2490e2e-086d-4a88-87cd-60cc6ddf7f8b.png)
 
 #### 20. `/api/board/delete/{boardNo}`- GET
+![image](https://user-images.githubusercontent.com/93763809/235716684-e3b27571-964e-4a1b-aa27-a75a5a16434d.png)
 
-#### 21. `/api/board/update/{boardNo}` - POST
+#### 21. `/api/board/update/{boardNo}` - PUT
+![image](https://user-images.githubusercontent.com/93763809/235716924-42ec2dee-ffb3-4299-b9d0-531a056eb9a2.png)
 
 #### 22. `/api/board/getattraction/{userNo}`- GET
+![image](https://user-images.githubusercontent.com/93763809/235717123-e9dac017-05ef-45cd-9177-82f469ecab6d.png)
+
 
 ### 공유 장소 작성
 |URL|메소드|요청값|역할|
@@ -121,30 +128,38 @@ EnjoyTrip RestAPI 프로젝트
 `/api/shareattraction/write`|POST|`{"attractionId" : "id" “shareNo : 1}`|attraction_id 작성
 `/api/shareattraction/delete/{shareNo}`|GET|`{}`|삭제 시간 등록(UPDATE), no = PK
 
-#### 23.
+#### 23. `/api/shareattraction/list` - GET
+![image](https://user-images.githubusercontent.com/93763809/235717915-ec0f1e94-b2b0-452f-a2e0-24a573b94699.png)
 
-#### 24.
+#### 24. `/api/shareattraction/write` - POST
+![image](https://user-images.githubusercontent.com/93763809/235717400-6ed3a4bc-f793-4766-80b7-fce36e270e9f.png)
 
-#### 25.
+#### 25. `/api/shareattraction/delete/{shareNo}` - GET
+![image](https://user-images.githubusercontent.com/93763809/235717992-40d506ee-c7c5-4665-9c8c-195dcb903280.png)
 
 
 ### 관리자 게시판 조회 및 작성, 삭제 수정
 |URL|메소드|요청값|역할|
 |---|---|---|---|
 `/api/notice/list`|GET|`{}`|
-`/api/notice/write`|POST|`{"title": “제목 작성", "contents": "제목 수정"}`|
+`/api/notice/write`|POST|`{"title": "제목", "contents": "내용", "userNo" : 1}`|
 `/api/notice/delete/{noticeNo}`|GET|`{}`|
 `/api/notice/update/{noticeNo}`|PUT|`{"title": “제목 수정", "contents": "내용 수정"}`|
 `/api/notice/info/{noticeNo}`|GET|`{}`|
 
-#### 23.
+#### 23. `/api/notice/list` - GET
+![image](https://user-images.githubusercontent.com/93763809/235718599-1e7c363a-8ce3-4fa0-9263-da922e5e86dd.png)
 
-#### 24.
+#### 24. `/api/notice/write` - POST
+![image](https://user-images.githubusercontent.com/93763809/235718506-8f270096-0034-44f1-a767-1914f005eef5.png)
 
-#### 25.
+#### 25. `/api/notice/delete/{noticeNo}` - GET
+![image](https://user-images.githubusercontent.com/93763809/235718662-57a456cb-2974-4a5b-8d06-40b1c10eb1e0.png)
 
-#### 26.
+#### 26. `/api/notice/update/{noticeNo}` - PUT
+![image](https://user-images.githubusercontent.com/93763809/235718771-03d8cf9b-e4d3-4dfc-86ec-de8fc41d0960.png)
 
-#### 27.
+#### 27. `/api/notice/info/{noticeNo}` - GET
+![image](https://user-images.githubusercontent.com/93763809/235719425-ca537697-15f9-4000-98f4-2b675d5fa95e.png)
 
-#### 28.
+
