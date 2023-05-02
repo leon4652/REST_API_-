@@ -61,8 +61,15 @@ EnjoyTrip RestAPI 프로젝트
 ### 공유 장소 작성
 |URL|메소드|요청값|역할|
 |---|---|---|---|
-
+`/api/shareattraction/list`|GET|`{}`|share_att 조회
+`/api/shareattraction/write`|POST|`{"attractionId" : "id" “shareNo : 1}`|attraction_id 작성
+`/api/shareattraction/delete/{shareNo}`|GET|`{}`|삭제 시간 등록(UPDATE), no = PK
 
 ### 관리자 게시판 조회 및 작성, 삭제 수정
 |URL|메소드|요청값|역할|
 |---|---|---|---|
+`/api/notice/list`|GET|`{}`|
+`/api/notice/write`|POST|
+`/api/notice/delete/{noticeNo}`|GET|`{}`|
+`/api/notice/update/{noticeNo}`|PUT|
+`/api/notice/info/{noticeNo}`|GET|`{}`|
