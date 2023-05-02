@@ -4,11 +4,17 @@ EnjoyTrip RestAPI 프로젝트
 
 ### Class Diagram
 
+URL|메소드|요청값|역할
+----------
+1|2|3|4
+
 ### ER Diagram
 
 ## 구현
 
 ### 로그인, 계정 관리
+
+
 
 ### 루트 게시물
 
