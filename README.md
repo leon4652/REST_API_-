@@ -17,19 +17,19 @@ EnjoyTrip RestAPI 프로젝트
 |`/api/myInfo/{userNo}`|GET|`{}`|내 정보 조회|
 |`/api/myInfo/{userNo}`|PUT|`{”id” : "ssafy1234", “password” : "1234"}`|내 정보 변경|
 
-1. `user/login`
+#### 1. `user/login`
 ![image](https://user-images.githubusercontent.com/93763809/235709535-57b7d183-668b-4b16-800b-6d489aa18175.png)
 
-2. `user/logout`
+#### 2. `user/logout`
 ![image](https://user-images.githubusercontent.com/93763809/235709603-a542cc37-8fd9-4122-a05e-0a457d5c6591.png)
 
-3. `user/checkDuplicateId`
+#### 3. `user/checkDuplicateId`
 ![image](https://user-images.githubusercontent.com/93763809/235709637-cee19e73-edfd-4c34-873f-ef42ad4a73b4.png)
 
-4. `api/myInfo/{userNo}` - GET
+#### 4. `api/myInfo/{userNo}` - GET
 ![image](https://user-images.githubusercontent.com/93763809/235709793-0a1f3f78-7d9d-4001-862f-e6c69cfbe1df.png)
 
-5. `api/myInfo/{userNo}` - PUT
+#### 5. `api/myInfo/{userNo}` - PUT
 ![image](https://user-images.githubusercontent.com/93763809/235709751-0f331bab-9a5a-43b7-8327-3e0ef35bacc9.png)
 
 
