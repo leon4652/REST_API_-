@@ -32,14 +32,8 @@ EnjoyTrip RestAPI 프로젝트
 5. `api/myInfo/{userNo}` - PUT
 ![image](https://user-images.githubusercontent.com/93763809/235709751-0f331bab-9a5a-43b7-8327-3e0ef35bacc9.png)
 
-6. `api/route` - GET
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/6660eb34-180c-4118-835c-98bccc2edc10/Untitled.png)
 
-7. `api/route` - POST
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/54adca2a-b9e3-4d9f-914d-2a6d4f6888b3/Untitled.png)
 
-8. `api/route/view/{userNo}` - GET
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/3fc68112-144f-4e74-ba35-40371f71cfa8/Untitled.png)
 
 
 ### 루트 게시물
@@ -52,6 +46,13 @@ EnjoyTrip RestAPI 프로젝트
 |`/api/route/{routeNo}`|PUT|`{"title" : "테스트5","orders" : [{"attractionId" : 100, "orderNum" : 1},{"attractionId" : 200, "orderNum" : 2},{"attractionId" : 300,"orderNum" : 3}]}` |루트 게시글 변경|
 |`/api/route/{routeNo}`|DELETE|`{}`|루트 게시물 삭제|
 |`/api/route/scrap/{routeNo}`|POST||루트 게시물 스크랩|
+
+6. `api/route` - GET
+
+7. `api/route` - POST
+
+8. `api/route/view/{userNo}` - GET
+
 ### 지역, 행사 조회
 |URL|메소드|요청값|역할|
 |---|---|---|---|
