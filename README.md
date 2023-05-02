@@ -36,7 +36,13 @@ EnjoyTrip RestAPI 프로젝트
 |`/api/route/{routeNo}`|DELETE|`{}`|루트 게시물 삭제|
 |`/api/route/scrap/{routeNo}`|POST||루트 게시물 스크랩|
 ### 지역, 행사 조회
-
+|URL|메소드|요청값|역할|
+|---|---|---|---|
+`/api/attraction/localList`|GET|`{}`|지역 리스트 조회|
+`/api/attraction/list?sido={sido}&pageNo={pageNo}`|GET|`{}`|행사 리스트 조회(지역 기반)|
+`/api/attraction/view/{attractionId}`|GET|`{}`|행사 상세 조회|
+`/api/attraction/favorite`|POST|`{"attractionId" : 125266, "flag" : 1}`|즐겨찾기 추가|
+`/api/attraction/favorite`|GET|{}|즐겨찾기한 행사 리스트 조회|
 ### 즐겨찾기 추가 및 조회
 
 ### 게시판 조회 및 작성, 삭제, 수정
