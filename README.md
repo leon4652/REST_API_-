@@ -13,7 +13,9 @@ EnjoyTrip RestAPI 프로젝트
 |---|---|---|---|
 |`/api/user/login`|POST|`{id : ssafy, password : 1234}`|로그인|
 |`/api/user/logout`|GET|`{}`|로그아웃|
-
+|`/api/user/checkDuplicateId`|GET|`{id: ssafy}`|아이디 중복확인|
+|`/api/myInfo/{userNo}`|GET|`{}`|내 정보 조회|
+|`/api/myInfo/{userNo}`|PUT|`{”id” : "ssafy1234", “password” : "1234"}`|내 정보 변경|
 
 ㄴ
 
@@ -25,6 +27,21 @@ EnjoyTrip RestAPI 프로젝트
 
 ### 루트 게시물
 
+|URL|메소드|요청값|역할|
+|---|---|---|---|
+|`/api/route`|GET|`{}`|
+|`/api/route`|POST|`{"memberNo" : 1, "title" : "테스트3"}`|
+|`/api/route/view/{routeNo}`|GET|`{}`|루트 게시물 조회|
+|`/api/route/{routeNo}`|PUT|`{
+"title" : "테스트5",
+"orders" : [
+{"attractionId" : 100, "orderNum" : 1},
+{"attractionId" : 200, "orderNum" : 2},
+{"attractionId" : 300, "orderNum" : 3}
+]
+}`|루트 게시글 변경|
+|`/api/route/{routeNo}`|DELETE|`{}`|루트 게시물 삭제|
+|`/api/route/scrap/{routeNo}`|POST||루트 게시물 스크랩|
 ### 지역, 행사 조회
 
 ### 즐겨찾기 추가 및 조회
