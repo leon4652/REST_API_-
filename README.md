@@ -13,10 +13,15 @@ EnjoyTrip RestAPI 프로젝트
 |---|---|---|---|
 |`/api/user/login`|POST|`{id : ssafy, password : 1234}`|로그인|
 |`/api/user/logout`|GET|`{}`|로그아웃|
-|---|---|---|---|
+
+
+ㄴ
 
 ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/f1e73ac1-c5ff-4065-b4c7-4f85b7ac43e3/Untitled.png)
 ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/cef55508-a6da-45ce-b150-8bd78cebf06a/Untitled.png)
+
+ㄷ
+![Untitled](https://user-images.githubusercontent.com/93763809/235611577-39bc3ef9-2ce8-431f-91b5-7d893d91e3fc.png)
 
 ### 루트 게시물
 
