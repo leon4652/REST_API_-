@@ -6,7 +6,6 @@ EnjoyTrip RestAPI 프로젝트
 
 |URL|메소드|요청값|역할|
 |---|---|---|---|
-|1|2|3|4|
 |`/api/user/login`|POST|`{id : ssafy, password : 1234}`|로그인|
 
 ### ER Diagram
