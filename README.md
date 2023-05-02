@@ -41,12 +41,28 @@ EnjoyTrip RestAPI 프로젝트
 `/api/attraction/localList`|GET|`{}`|지역 리스트 조회|
 `/api/attraction/list?sido={sido}&pageNo={pageNo}`|GET|`{}`|행사 리스트 조회(지역 기반)|
 `/api/attraction/view/{attractionId}`|GET|`{}`|행사 상세 조회|
+
+### 즐겨찾기 추가 및 조회
+|URL|메소드|요청값|역할|
+|---|---|---|---|
 `/api/attraction/favorite`|POST|`{"attractionId" : 125266, "flag" : 1}`|즐겨찾기 추가|
 `/api/attraction/favorite`|GET|{}|즐겨찾기한 행사 리스트 조회|
-### 즐겨찾기 추가 및 조회
 
 ### 게시판 조회 및 작성, 삭제, 수정
+|URL|메소드|요청값|역할|
+|---|---|---|---|
+`/api/board/list`|GET|`{}`|전체 게시글 조회
+`/api/board/info/{boardNo}`|GET|`{}`|특정 게시글(no) 조회
+`/api/board/write`|POST|`{"title": "제목", "contents": "내용"}`|게시글 작성
+`/api/board/delete/{boardNo}`|GET|`{}`|게시글 삭제 시간 등록(UPDATE)
+`/api/board/update/{boardNo}`|POST|`{"title": "제목 수정", "contents": "내용 수정"}`|게시글 수정, 수정 시간 등록
+`/api/board/getattraction/{userNo}`|GET|`{}`|유저 no에 맞는 share_att 조회
 
 ### 공유 장소 작성
+|URL|메소드|요청값|역할|
+|---|---|---|---|
+
 
 ### 관리자 게시판 조회 및 작성, 삭제 수정
+|URL|메소드|요청값|역할|
+|---|---|---|---|
