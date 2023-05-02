@@ -4,10 +4,8 @@ EnjoyTrip RestAPI 프로젝트
 
 ### ER Diagram
 
-![image](https://user-images.githubusercontent.com/93763809/235720056-d9c11bb5-f830-478a-b57f-63dd6f335a88.png)
-
-![image](https://user-images.githubusercontent.com/93763809/235720001-2a8c5f42-083f-4e9e-935f-af4ea316896b.png)
-
+![image](https://user-images.githubusercontent.com/93763809/235720570-b15e4c02-aa64-4536-8b12-0d613817d21b.png)
+![image](https://user-images.githubusercontent.com/93763809/235720620-d0f702a9-6b96-462b-91f7-09cda84c1794.png)
 
 ## 구현
 
