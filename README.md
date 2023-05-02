@@ -17,13 +17,30 @@ EnjoyTrip RestAPI 프로젝트
 |`/api/myInfo/{userNo}`|GET|`{}`|내 정보 조회|
 |`/api/myInfo/{userNo}`|PUT|`{”id” : "ssafy1234", “password” : "1234"}`|내 정보 변경|
 
-ㄴ
-
+1. `user/login`
 ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/f1e73ac1-c5ff-4065-b4c7-4f85b7ac43e3/Untitled.png)
+
+2. `user/logout`
 ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/cef55508-a6da-45ce-b150-8bd78cebf06a/Untitled.png)
 
-ㄷ
-![Untitled](https://user-images.githubusercontent.com/93763809/235611577-39bc3ef9-2ce8-431f-91b5-7d893d91e3fc.png)
+3. `user/checkDuplicateId`
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/a597334a-d1e0-4439-94e9-879fcedf15eb/Untitled.png)
+
+4. `api/myInfo/{userNo}` - GET
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/6894354b-080b-4232-8e4c-b5cc7eb09c3e/Untitled.png)
+
+5. `api/myInfo/{userNo}` - PUT
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/0fd6aad1-aa97-4413-a953-d03a58cd22e1/Untitled.png)
+
+6. `api/route` - GET
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/6660eb34-180c-4118-835c-98bccc2edc10/Untitled.png)
+
+7. `api/route` - POST
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/54adca2a-b9e3-4d9f-914d-2a6d4f6888b3/Untitled.png)
+
+8. `api/route/view/{userNo}` - GET
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/3fc68112-144f-4e74-ba35-40371f71cfa8/Untitled.png)
+
 
 ### 루트 게시물
 
@@ -69,7 +86,7 @@ EnjoyTrip RestAPI 프로젝트
 |URL|메소드|요청값|역할|
 |---|---|---|---|
 `/api/notice/list`|GET|`{}`|
-`/api/notice/write`|POST|
+`/api/notice/write`|POST|`{"title": “제목 작성", "contents": "제목 수정"}`|
 `/api/notice/delete/{noticeNo}`|GET|`{}`|
-`/api/notice/update/{noticeNo}`|PUT|
+`/api/notice/update/{noticeNo}`|PUT|`{"title": “제목 수정", "contents": "내용 수정"}`|
 `/api/notice/info/{noticeNo}`|GET|`{}`|
