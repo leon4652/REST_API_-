@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.enjoytrip.attraction.model.mapper.AttractionMapper">
+	
+	<resultMap type="attraction" id="attractionMap">
+		<result column="content_id" property="contentId"/>
+		<result column="title" property="title"/>
+		<result column="content_type_id" property="contentTypeId"/>
+		<result column="addr1" property="addr1"/>
+		<result column="first_image" property="firstImage"/>
+		<result column="sido_code" property="sidoCode"/>
+		<result column="gugun_code" property="gugunCode"/>
+		<result column="latitude" property="latitude"/>
+		<result column="longitude" property="longitude"/>
+		<association property="overview" select="selectOverview" column="content_id"/>
+	</resultMap>
+	
+	<select id="selectOverview" resultType="string" parameterType="int">
+		SELECT overview 
+		From attraction_description
+		Where content_id = #{contentId}	
+	</select>
+	
+	<select id="select_attraction_description"></select>
+	
+
+	<select id="selectSido" resultType="sido">
+		select sido_code sidoCode, sido_name sidoName
+		from sido
+		order by sido_code
+	</select>
+	
+	<select id="selectContent" resultType="contentType">
+		select content_type_id contentTypeId, content_type_name contentTypeName
+		from content_type 
+		order by content_type_id 
+	</select>
+	
+	<select id="selectAttraction" parameterType="map" resultType="attraction">
+		select content_id contentId, title, first_image firstImage
+		from attraction_info
+		where content_type_id = #{contentId} and sido_code = #{sidoCode}
+		order by readcount desc
+		limit 20
+	</select>
+	
+	<select id="selectAttByContent" parameterType="int" resultType="attraction">
+		select content_id contentId, title, first_image firstImage, sido_code sidoCode
+		from attraction_info
+		where content_type_id = #{contentTypeId}
+		order by readcount desc
+		limit 30 
+	</select>
+	
+	<select id="attListByDetailSido" parameterType="attraction"  resultMap = "attractionMap">
+	 	SELECT content_id, content_type_id, title, addr1,
+			first_image, sido_code, gugun_code, latitude, longitude
+	 	FROM  attraction_info
+		Where sido_code = #{sidoCode}  and content_type_id = #{contentTypeId}
+		ORDER BY readcount desc	 
+		LIMIT 30
+	</select>
+	
+	<select id="attChooseContent" parameterType="int" resultMap = "attractionMap">
+		SELECT content_id, content_type_id, title, addr1,
+			first_image, sido_code, gugun_code, latitude, longitude
+		FROM  attraction_info
+		Where content_id = #{contentId}
+	</select>
+	
+	<select id="selectAttByKeyword" parameterType="string" resultMap="attractionMap">
+		SELECT content_id, content_type_id, title, addr1,
+			first_image, sido_code, gugun_code, latitude, longitude
+		FROM  attraction_info 
+		Where title like concat('%', #{keyword}, '%') 
+		ORDER BY readcount desc
+		LIMIT 30
+	</select>
+	
+	<select id="attListByDetailContent"  parameterType="attraction"  resultMap="attractionMap">
+		SELECT content_id, content_type_id, title, addr1,
+			first_image, sido_code, gugun_code, latitude, longitude
+		FROM  attraction_info 
+		WHERE content_type_id = #{contentTypeId}
+		ORDER BY readcount desc
+		LIMIT 30
+	</select>
+	
+</mapper>

@@ -1,0 +1,90 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-size: 20px;
+}
+
+.header {
+	background-color: white;
+	box-shadow: 1px 1px 10px rgb(235, 234, 234);
+}
+
+.container {
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	padding: 30vh;
+}
+
+.title {
+	font-size: 26px;
+	font-weight: bold;
+	text-align: center;
+	padding-bottom: 20px;
+}
+
+.form {
+	background: #ffffff;
+	max-width: 360px;
+	padding: 30px 45px;
+	text-align: center;
+	box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.111), 0 5px 5px 0
+		rgba(0, 0, 0, 0.111);
+}
+
+.form input {
+	outline: 0;
+	border: 0;
+	border-bottom: 1px solid;
+	width: 100%;
+	margin: 0 0 10px;
+	padding: 15px;
+	box-sizing: border-box;
+	font-size: 14px;
+}
+
+.buttonbox {
+	margin: 15px 0 15px 0px;
+}
+
+.form button, .buttonbox button {
+	margin: 0 0 15px;
+	text-transform: uppercase;
+	outline: 0;
+	background: rgb(95, 111, 148);
+	width: 100%;
+	height: 40px;
+	border: 0;
+	margin-bottom: 10px;
+	color: #ffffff;
+	font-size: 14px;
+	-webkit-transition: all 0.3 ease;
+	transition: all 0.3 ease;
+	cursor: pointer;
+}
+
+.buttonbox {
+	margin: 15px 0 15px 0px;
+}
+
+.buttonbox button {
+	height: 60px;
+}
+
+.form button:hover, .form button:active, .form button:focus {
+	background: rgba(95, 111, 148, 0.673);
+}
+
+.buttonbox button:hover, .buttonbox button:active, .buttonbox button:focus
+	{
+	background: rgba(95, 111, 148, 0.673);
+}
+
+#idchkComent {
+	font-size: 13px;
+	text-align: right;
+	margin-right: 10x
+}

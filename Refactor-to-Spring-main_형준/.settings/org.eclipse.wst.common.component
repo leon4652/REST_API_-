@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="Refactor-to-Spring-main_형준">
+        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <property name="context-root" value="Refactor-to-Spring-main_형준"/>
+        <property name="java-output-path" value="/Refactor-to-Spring-main_형준/build/classes"/>
+    </wb-module>
+</project-modules>

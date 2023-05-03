@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.ssafy.enjoytrip.user.model.mapper.UserMapper">
+	
+	<select id="login" parameterType="map" resultType="user">
+		SELECT id, name, email 
+		from user
+		WHERE id = #{id} and pw = #{pw}
+	</select>
+	
+	<insert id="register" parameterType="user">
+		Insert into user(id, pw, name, email)
+		values(#{id}, #{pw}, #{name}, #{email} )
+	</insert>
+	
+	<select id="duplicateCheck" parameterType="string" resultType="string">
+		SELECT id from user
+		where id = #{id}
+	</select>
+	
+	<select id="selectId" parameterType="map" resultType="user">
+		SELECT id from user
+		where name = #{name} and email = #{email}
+	</select>
+	
+	<select id="selectUser" parameterType="map" resultType="user">
+		Select id, email
+		from use
+		where id = #{id} and email = #{email}
+	</select>
+	
+	<update id="updatePw" parameterType="map">
+		update user
+		set pw = #{pw}
+		where id = #{id}
+	</update>
+	
+	<delete id="deleteUser" parameterType="user">
+		delete from user
+		where id = #{id}
+	</delete>
+	
+	<update id = "updateUser" parameterType="map">
+		update user
+		set name = #{name}, email = #{email}
+		where id = #{id}
+	</update>
+	
+</mapper>

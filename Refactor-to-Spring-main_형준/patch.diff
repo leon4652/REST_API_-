@@ -1,0 +1,1016 @@
+From f4dad521fdcb4801b1d679d67867bc71202ada60 Mon Sep 17 00:00:00 2001
+From: wjdgusaho <wjdgusaho@gmail.com>
+Date: Tue, 25 Apr 2023 16:35:41 +0900
+Subject: [PATCH] Update : refactor User Controller, Service, Dao && add spring
+ annotaion
+
+---
+ .../{ => home/controller}/HomeController.java |   8 +-
+ .../user/controller/MypageController.java     |  19 +-
+ .../user/controller/UserController.java       | 291 ++++++------------
+ .../enjoytrip/user/model/dao/UserDao.java     |   2 +-
+ .../enjoytrip/user/model/dao/UserDaoImpl.java |  47 +--
+ .../user/model/service/UserService.java       |   2 +-
+ .../user/model/service/UserServiceImpl.java   |  19 +-
+ .../main/webapp/WEB-INF/views/include/nav.jsp |   6 +-
+ .../com/ssafy/enjoytrip/HomeController.class  | Bin 1659 -> 0 bytes
+ .../home/controller/HomeController.class      | Bin 0 -> 1699 bytes
+ .../user/controller/MypageController.class    | Bin 2367 -> 4560 bytes
+ .../user/controller/UserController.class      | Bin 3203 -> 4751 bytes
+ .../enjoytrip/user/model/dao/UserDao.class    | Bin 1092 -> 675 bytes
+ .../user/model/dao/UserDaoImpl.class          | Bin 4024 -> 4417 bytes
+ .../user/model/service/UserService.class      | Bin 1092 -> 675 bytes
+ .../user/model/service/UserServiceImpl.class  | Bin 2864 -> 2091 bytes
+ 16 files changed, 150 insertions(+), 244 deletions(-)
+ rename EnjoyTrip/src/main/java/com/ssafy/enjoytrip/{ => home/controller}/HomeController.java (88%)
+ delete mode 100644 EnjoyTrip/target/classes/com/ssafy/enjoytrip/HomeController.class
+ create mode 100644 EnjoyTrip/target/classes/com/ssafy/enjoytrip/home/controller/HomeController.class
+
+diff --git a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/HomeController.java b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/home/controller/HomeController.java
+similarity index 88%
+rename from EnjoyTrip/src/main/java/com/ssafy/enjoytrip/HomeController.java
+rename to EnjoyTrip/src/main/java/com/ssafy/enjoytrip/home/controller/HomeController.java
+index 94d9538..d8249d9 100644
+--- a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/HomeController.java
++++ b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/home/controller/HomeController.java
+@@ -1,4 +1,4 @@
+-package com.ssafy.enjoytrip;
++package com.ssafy.enjoytrip.home.controller;
+ 
+ import java.text.DateFormat;
+ import java.util.Date;
+@@ -19,9 +19,7 @@ public class HomeController {
+ 	
+ 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+ 	
+-	/**
+-	 * Simply selects the home view to render by returning its name.
+-	 */
++	
+ 	@RequestMapping(value = "/", method = RequestMethod.GET)
+ 	public String home(Locale locale, Model model) {
+ 		logger.info("Welcome home! The client locale is {}.", locale);
+@@ -33,7 +31,7 @@ public class HomeController {
+ 		
+ 		model.addAttribute("serverTime", formattedDate );
+ 		
+-		return "home";
++		return "index";
+ 	}
+ 	
+ }
+diff --git a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/controller/MypageController.java b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/controller/MypageController.java
+index 3742403..9cf0cf6 100644
+--- a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/controller/MypageController.java
++++ b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/controller/MypageController.java
+@@ -9,18 +9,21 @@ import javax.servlet.http.HttpServlet;
+ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpServletResponse;
+ 
+-import com.ssafy.user.model.User;
+-import com.ssafy.user.model.service.UserService;
+-import com.ssafy.user.model.service.UserServiceImpl;
++import org.springframework.stereotype.Controller;
+ 
+-@WebServlet("/mypage")
++import com.ssafy.enjoytrip.user.model.User;
++import com.ssafy.enjoytrip.user.model.service.UserService;
++import com.ssafy.enjoytrip.user.model.service.UserServiceImpl;
++
++@Controller("/mypage")
+ public class MypageController extends HttpServlet {
+-	private UserService userService = UserServiceImpl.getInstance();
+ 	
+-	@Override
+-	public void init() throws ServletException {
+-	}
++	private UserService userService;
+ 	
++	public MypageController(UserService userService) {
++		this.userService = userService;
++	}
++
+ 	@Override
+ 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+ 		request.setCharacterEncoding("utf-8");
+diff --git a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/controller/UserController.java b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/controller/UserController.java
+index 655b67e..0ffb126 100644
+--- a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/controller/UserController.java
++++ b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/controller/UserController.java
+@@ -11,239 +11,144 @@ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpServletResponse;
+ import javax.servlet.http.HttpSession;
+ 
++import org.springframework.stereotype.Controller;
++import org.springframework.ui.Model;
++import org.springframework.web.bind.annotation.GetMapping;
++import org.springframework.web.bind.annotation.PostMapping;
++import org.springframework.web.bind.annotation.ResponseBody;
++
+ import com.fasterxml.jackson.databind.ObjectMapper;
+-import com.ssafy.user.model.User;
+-import com.ssafy.user.model.service.UserService;
+-import com.ssafy.user.model.service.UserServiceImpl;
++import com.ssafy.enjoytrip.user.model.User;
++import com.ssafy.enjoytrip.user.model.service.UserService;
++import com.ssafy.enjoytrip.user.model.service.UserServiceImpl;
+ 
+-@WebServlet("/user")
++@Controller("/user")
+ public class UserController extends HttpServlet {
++
+ 	private UserService userService;
+-	private HttpSession session;
+ 
+-	@Override
+-	public void init() throws ServletException {
+-		userService = UserServiceImpl.getInstance();
++	public UserController(UserService userService) {
++		this.userService = userService;
+ 	}
+ 
+-	@Override
+-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+-			throws ServletException, IOException {
+-		request.setCharacterEncoding("utf-8");
+-		doGet(request, response);
+-	}
++	// 로그인
++	@PostMapping("login")
++	private String login(HttpSession session, String id, String pw, String remember, HttpServletResponse response) {
+ 
+-	@Override
+-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+-			throws ServletException, IOException {
+-		String action = request.getParameter("action");
+-		if (action == null || action.equals(""))
+-			action = "index";
+-
+-		String path;
+-		switch (action) {
+-		case "index":
+-			redirect(request, response, "/index.jsp");
+-			break;
+-
+-		case "login":
+-			//로그인 기능
+-			path = login(request, response);
+-			redirect(request, response, path);
+-			break;
+-
+-		case "logout":
+-			//로그아웃 기능
+-			path = logout(request, response);
+-			redirect(request, response, path);
+-			break;
+-
+-		case "loginForm":
+-			//로그인 폼
+-			redirect(request, response, "/user/loginForm.jsp");
+-			break;
+-		
+-		case "registerForm":
+-			//회원가입 폼
+-			forward(request, response,"/user/register.jsp");
+-			break;
+-			
+-		case "register":
+-			//회원가입
+-			path = register(request, response);
+-			redirect(request, response, path);
+-			break;
+-	
+-		case "duplicateCheck":
+-			//회원가입 중복체크
+-			path = duplicateCheck(request, response);
+-//			forword(request, response, path);
+-			break;
+-		case "idfind":
+-			//아이디 찾기
+-			idFind(request, response);
+-			break;
+-		case "pwfind":
+-			//비밀번호 찾기
+-			path = pwFind(request, response);
+-			forward(request, response, path);
+-			break;
+-		case "pwupdate":
+-			path = pwUpdate(request, response);
+-			forward(request, response, path);
+-			break;
+-		}
+-		
+-		
+-	}
+-	
+-	private String pwUpdate(HttpServletRequest request, HttpServletResponse response) {
+-		String passwd = request.getParameter("passwd");
+-		String id = request.getParameter("id");
+-		
+-		try {
+-			request.setAttribute("update", userService.pwUpdate(id, passwd));
+-		} catch (Exception e) {
+-			e.printStackTrace();
+-			return "/error/error.jsp";
+-		}
+-		
+-		return "/user/pwUpdate.jsp";
+-	}
++		User user;
+ 
+-	private String pwFind(HttpServletRequest request, HttpServletResponse response) {
+-		String id = request.getParameter("id");
+-		String email = request.getParameter("email");
+-		
+ 		try {
+-			User user = userService.pwFind(id, email);
+-			request.setAttribute("user", user);
++			// 사용자가 입력한값과 db에 값이 같은게 있는지 찾아서 있으면 값을 없으면 null
++			user = userService.login(id, pw);
++			System.out.println(user.getId());
++			System.out.println(user.getName());
++			System.out.println(user.getEmail());
+ 		} catch (Exception e) {
+ 			e.printStackTrace();
+-			return "/error/error.jsp";
++			return "error/error";
+ 		}
+-		
+-		return "/user/pwUpdate.jsp";
+-	}
+ 
+-	//아이디 찾기 
+-	private void idFind(HttpServletRequest request, HttpServletResponse response) {
+-		String name = request.getParameter("name");
+-		String email= request.getParameter("email");
+-		
+-		try {
+-			User user = userService.idFind(name, email);
+-			
+-			ObjectMapper objectMapper = new ObjectMapper();
+-			String userJson = objectMapper.writeValueAsString(user);
+-			
+-			response.setContentType("application/json;charset=UTF-8");
+-			PrintWriter out = response.getWriter();
+-			out.print(userJson);
+-			out.flush();
+-		} catch (Exception e) {
+-			e.printStackTrace();
++		if (remember != null) {
++			Cookie cookie = new Cookie("savedId", id);
++			cookie.setMaxAge(60 * 60 * 24 * 365 * 20);
++			response.addCookie(cookie);
++
++		} else {
++			Cookie cookie = new Cookie("savedId", id);
++			cookie.setMaxAge(0);
++			response.addCookie(cookie);
+ 		}
+-	}
+ 
+-	//회원가입시 아이디 중복체크
+-	private String duplicateCheck(HttpServletRequest request, HttpServletResponse response) {
+-		
+-		String id = request.getParameter("id");
+-		String check;
+-		
+-		try {
+-		check = userService.duplicateCheck(id);
+-		
+-		System.out.println(check);
+-		//중복체크하면서 입력한값이 초기화 되지 않기 위해 !
+-		PrintWriter out = response.getWriter();
+-		out.print(check);
+-		
+-		} catch (Exception e) {
+-			e.printStackTrace();
+-			return "/error/error.jsp";
++		// db에서 받아온값에 아이디와 비밀번호가 있다면 로그인해라
++		if (user.getId() != null && user.getName() != null) {
++			session.setAttribute("userInfo", user);
++
++			return "index";
++		} else {
++			// 그외에는 로그인 되면 안된다!
++			return "/loginForm";
+ 		}
+-		
+-		return "/user?action=registerForm";
+-		
+ 	}
+ 
+-	//회원가입
+-	private String register(HttpServletRequest request, HttpServletResponse response) {
+-		User user = new User();
++	//로그인 폼
++	@GetMapping("login")
++	private String login() {
++		return "loginForm";
++	}
+ 	
++	//로그인 아웃
++	@GetMapping("logout")
++	private String logout(HttpSession session) {
++		session.removeAttribute("userInfo");
++		return "index";
++	}
++
++	// 회원가입
++	@PostMapping("regist")
++	private String register(User user) {
++
+ 		try {
+-			user.setId(request.getParameter("id"));
+-			user.setPw(request.getParameter("pw"));
+-			user.setName(request.getParameter("name"));
+-			user.setEmail(request.getParameter("email"));
+-			//회원가입 
++			// 회원가입
+ 			userService.register(user);
+ 		} catch (Exception e) {
+ 			e.printStackTrace();
+-			return "/error/error.jsp";
++			return "error/error";
+ 		}
+-		
+-		return "/user?action=loginForm";
+-	}
+-	
+-	//로그아웃
+-	private String logout(HttpServletRequest request, HttpServletResponse response) {
+-		session.removeAttribute("userInfo");
+-		return "/index.jsp";
++
++		return "redirect:login";
+ 	}
+ 
+-	//로그인
+-	private String login(HttpServletRequest request, HttpServletResponse response) {
++	@GetMapping("regist")
++	private String register() {
++		return "register";
++	}
+ 
+-		String id = request.getParameter("id");
+-		String pw = request.getParameter("pw");
+-		User user;
++	// ajax를 통해 입력값 체크
++	@GetMapping("duplicateCheck")
++	@ResponseBody
++	private String duplicateCheck(String id) throws Exception {
++		String check = userService.duplicateCheck(id);
++		return check;
++	}
+ 
++	// 비밀번호 업데이트
++	@GetMapping("pwupdate")
++	private String pwUpdate(String passwd, String id, Model model) {
+ 		try {
+-			// 사용자가 입력한값과 db에 값이 같은게 있는지 찾아서 있으면 값을 없으면 null
+-			user = userService.login(id, pw);
+-			System.out.println(user.getId());
+-			System.out.println(user.getName());
+-			System.out.println(user.getEmail());
++			model.addAttribute("update", userService.pwUpdate(id, passwd));
+ 		} catch (Exception e) {
+ 			e.printStackTrace();
+-			return "/error/error.jsp";
++			return "/error/error";
+ 		}
+ 
+-		// 체크가 체크되어잇다면 쿠키에 저장해라 ( check 값이 null 이아니라면!! )
+-		String check = request.getParameter("remember");
+-		if (check != null) {
+-			Cookie cookie = new Cookie("savedId", request.getParameter("id"));
+-			cookie.setMaxAge(60 * 60 * 24 * 365 * 20);
+-			response.addCookie(cookie);
++		return "pwUpdate";
++	}
+ 
+-		} else {
+-			Cookie cookie = new Cookie("savedId", request.getParameter("id"));
+-			cookie.setMaxAge(0);
+-			response.addCookie(cookie);
++	// 비밀번호 찾기
++	@GetMapping("pwfind")
++	private String pwFind(String id, String email, Model model) {
++		try {
++			User user = userService.pwFind(id, email);
++			model.addAttribute("user", user);
++		} catch (Exception e) {
++			e.printStackTrace();
++			return "/error/error";
+ 		}
+ 
+-		// db에서 받아온값에 아이디와 비밀번호가 있다면 로그인해라
+-		if (user.getId() != null && user.getName() != null) {
+-			session = request.getSession();
+-			session.setAttribute("userInfo", user);
+-
+-			return "/index.jsp";
+-		} else {
+-			// 그외에는 로그인 되면 안된다!
+-			return "/user?action=loginForm";
+-		}
++		return "pwUpdate";
+ 	}
+ 
+-	private void redirect(HttpServletRequest request, HttpServletResponse response, String path) throws IOException {
+-		response.sendRedirect(request.getContextPath() + path);
+-	}
++	//아이디 찾기 ajax
++	@GetMapping("idfind")
++	@ResponseBody
++	private String idFind(String name, String email) throws Exception {
++
++		User user = userService.idFind(name, email);
+ 
+-	private void forward(HttpServletRequest request, HttpServletResponse response, String path)
+-			throws ServletException, IOException {
+-		request.getRequestDispatcher(path).forward(request, response);
++		ObjectMapper objectMapper = new ObjectMapper();
++		String userJson = objectMapper.writeValueAsString(user);
++		// response.setContentType("application/json;charset=UTF-8");
++		return userJson;
+ 	}
+ 
+ }
+diff --git a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/dao/UserDao.java b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/dao/UserDao.java
+index 90a0f67..8de4cda 100644
+--- a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/dao/UserDao.java
++++ b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/dao/UserDao.java
+@@ -2,7 +2,7 @@ package com.ssafy.enjoytrip.user.model.dao;
+ 
+ import java.sql.SQLException;
+ 
+-import com.ssafy.user.model.User;
++import com.ssafy.enjoytrip.user.model.User;
+ 
+ public interface UserDao {
+ 	User login(String id, String pw) throws SQLException;
+diff --git a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/dao/UserDaoImpl.java b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/dao/UserDaoImpl.java
+index 7d56296..ab5905a 100644
+--- a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/dao/UserDaoImpl.java
++++ b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/dao/UserDaoImpl.java
+@@ -5,21 +5,22 @@ import java.sql.PreparedStatement;
+ import java.sql.ResultSet;
+ import java.sql.SQLException;
+ 
+-import com.ssafy.user.model.User;
+-import com.ssafy.util.DBUtil;
++import javax.sql.DataSource;
+ 
++import org.springframework.stereotype.Repository;
++
++import com.ssafy.enjoytrip.user.model.User;
++import com.ssafy.enjoytrip.util.DBUtil;
++
++@Repository
+ public class UserDaoImpl implements UserDao {
+-	private static UserDao instance = new UserDaoImpl();
+-	private DBUtil db;
++
++	private DataSource dataSource;
+ 	
+-	private UserDaoImpl() {
+-		db = DBUtil.getInstance();
++	private UserDaoImpl(DataSource dataSource) {
++		this.dataSource = dataSource;
+ 	}
+ 	
+-	public static UserDao getInstance() {
+-		return instance;
+-	}
+-
+ 	//로그인
+ 	@Override
+ 	public User login(String id, String pw) throws SQLException {
+@@ -30,7 +31,7 @@ public class UserDaoImpl implements UserDao {
+ 		sql.append(" Select id, name, email from user WHERE id = ? and pw = ? ");
+ 
+ 		try (
+-				Connection con = db.getConnection(); 
++				Connection con = dataSource.getConnection(); 
+ 				PreparedStatement pstm = con.prepareStatement(sql.toString());
+ 			) {
+ 			int idx = 1;
+@@ -55,7 +56,7 @@ public class UserDaoImpl implements UserDao {
+ 		sql.append(" insert into user(id, pw, name, email) values (?, ?, ?, ? )");
+ 		
+ 		try (
+-				Connection con = db.getConnection(); 
++				Connection con = dataSource.getConnection(); 
+ 				PreparedStatement pstm = con.prepareStatement(sql.toString());
+ 			) {
+ 			int idx = 1;
+@@ -77,7 +78,7 @@ public class UserDaoImpl implements UserDao {
+ 		StringBuffer sql = new StringBuffer();
+ 		sql.append(" Select id from user where id = ?");
+ 		try (
+-				Connection con = db.getConnection(); 
++				Connection con = dataSource.getConnection(); 
+ 				PreparedStatement pstm = con.prepareStatement(sql.toString());
+ 			) {
+ 			pstm.setString(1, id);
+@@ -98,7 +99,7 @@ public class UserDaoImpl implements UserDao {
+ 		PreparedStatement pstmt = null;
+ 		
+ 		try {
+-			conn = db.getConnection();
++			conn = dataSource.getConnection();
+ 			StringBuilder sql = new StringBuilder();
+ 			sql.append("select id ");
+ 			sql.append("from user ");
+@@ -113,7 +114,7 @@ public class UserDaoImpl implements UserDao {
+ 				user.setId(rs.getString("id"));
+ 			}
+ 		} finally {
+-			db.close(pstmt, conn);
++			dataSource.close(pstmt, conn);
+ 		}
+ 		
+ 		return user;
+@@ -126,7 +127,7 @@ public class UserDaoImpl implements UserDao {
+ 		PreparedStatement pstmt = null;
+ 		
+ 		try {
+-			conn = db.getConnection();
++			conn = dataSource.getConnection();
+ 			StringBuilder sql = new StringBuilder();
+ 			sql.append("select id, email ");
+ 			sql.append("from user ");
+@@ -143,7 +144,7 @@ public class UserDaoImpl implements UserDao {
+ 				user.setEmail(rs.getString("email"));
+ 			}
+ 		} finally {
+-			db.close(pstmt, conn);
++			dataSource.close(pstmt, conn);
+ 		}
+ 		
+ 		return user;
+@@ -156,7 +157,7 @@ public class UserDaoImpl implements UserDao {
+ 		PreparedStatement pstmt = null;
+ 		
+ 		try {
+-			conn = db.getConnection();
++			conn = dataSource.getConnection();
+ 			StringBuilder sql = new StringBuilder();
+ 			sql.append("update user ");
+ 			sql.append("set pw=? ");
+@@ -167,7 +168,7 @@ public class UserDaoImpl implements UserDao {
+ 			pstmt.setString(2, id);
+ 			update = pstmt.executeUpdate();
+ 		} finally {
+-			db.close(pstmt, conn);
++			dataSource.close(pstmt, conn);
+ 		}
+ 		
+ 		return update;
+@@ -179,7 +180,7 @@ public class UserDaoImpl implements UserDao {
+ 		PreparedStatement pstmt = null;
+ 		
+ 		try {
+-			conn = db.getConnection();
++			conn = dataSource.getConnection();
+ 			StringBuilder sql = new StringBuilder();
+ 			sql.append("delete from user ");
+ 			sql.append("where id=? ");
+@@ -188,7 +189,7 @@ public class UserDaoImpl implements UserDao {
+ 			pstmt.setString(1, user.getId());
+ 			pstmt.executeUpdate();
+ 		} finally {
+-			db.close(pstmt, conn);
++			dataSource.close(pstmt, conn);
+ 		}
+ 	}
+ 
+@@ -198,7 +199,7 @@ public class UserDaoImpl implements UserDao {
+ 		PreparedStatement pstmt = null;
+ 		
+ 		try {
+-			conn = db.getConnection();
++			conn = dataSource.getConnection();
+ 			StringBuilder sql = new StringBuilder();
+ 			sql.append("update user ");
+ 			sql.append("set name=?, email=? ");
+@@ -211,7 +212,7 @@ public class UserDaoImpl implements UserDao {
+ 			pstmt.setString(++index, id);
+ 			pstmt.executeUpdate();
+ 		} finally {
+-			db.close(pstmt, conn);
++			dataSource.close(pstmt, conn);
+ 		}
+ 	}
+ }
+diff --git a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/service/UserService.java b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/service/UserService.java
+index f902ed9..4cceca1 100644
+--- a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/service/UserService.java
++++ b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/service/UserService.java
+@@ -1,6 +1,6 @@
+ package com.ssafy.enjoytrip.user.model.service;
+ 
+-import com.ssafy.user.model.User;
++import com.ssafy.enjoytrip.user.model.User;
+ 
+ public interface UserService {
+ 	User login(String id, String pw) throws Exception;
+diff --git a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/service/UserServiceImpl.java b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/service/UserServiceImpl.java
+index c68c6e6..4b20291 100644
+--- a/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/service/UserServiceImpl.java
++++ b/EnjoyTrip/src/main/java/com/ssafy/enjoytrip/user/model/service/UserServiceImpl.java
+@@ -1,19 +1,18 @@
+ package com.ssafy.enjoytrip.user.model.service;
+ 
+-import com.ssafy.user.model.User;
+-import com.ssafy.user.model.dao.UserDao;
+-import com.ssafy.user.model.dao.UserDaoImpl;
++import org.springframework.stereotype.Service;
+ 
++import com.ssafy.enjoytrip.user.model.User;
++import com.ssafy.enjoytrip.user.model.dao.UserDao;
++import com.ssafy.enjoytrip.user.model.dao.UserDaoImpl;
++
++@Service
+ public class UserServiceImpl implements UserService {
+-	private static UserService instance = new UserServiceImpl();
+-	private UserDao userDao;
+ 	
+-	private UserServiceImpl() {
+-		userDao = UserDaoImpl.getInstance();
+-	}
++	private UserDao userDao;
+ 	
+-	public static UserService getInstance() {
+-		return instance;
++	private UserServiceImpl(UserDao userDao) {
++		this.userDao = userDao;
+ 	}
+ 	
+ 	@Override
+diff --git a/EnjoyTrip/src/main/webapp/WEB-INF/views/include/nav.jsp b/EnjoyTrip/src/main/webapp/WEB-INF/views/include/nav.jsp
+index 2325ceb..3b7fbfb 100644
+--- a/EnjoyTrip/src/main/webapp/WEB-INF/views/include/nav.jsp
++++ b/EnjoyTrip/src/main/webapp/WEB-INF/views/include/nav.jsp
+@@ -4,7 +4,7 @@
+ <link rel="stylesheet" href="${root}/assets/css/header.css" />
+ <link rel="stylesheet" href="${root}/assets/css/font.css" />
+ 
+-<a href="${root}/user?action=index"><img id="logo" class="logo"
++<a href="${root}/"><img id="logo" class="logo"
+ 	src="${root}/assets/img/logo.png" alt="메인이미지" /></a>
+ <div class="header">
+ 	<div class="nav">
+@@ -21,12 +21,12 @@
+ 			<c:choose>
+ 				<%-- session에 userInfo 객체 없는 경우(로그인 X) --%>
+ 				<c:when test="${empty userInfo}">
+-					<a href="${root}/user?action=loginForm" id="login">로그인</a>
++					<a href="${root}/user/login" id="login">로그인</a>
+ 				</c:when>
+ 				<%-- session에 userInfo 객체 있는 경우(로그인 O) --%>
+ 				<c:otherwise>
+ 					<a>${userInfo.id}님 반갑습니다!</a>
+-					<a href="${root}/user?action=logout" style="margin-right: 15px">로그아웃</a>
++					<a href="${root}/user/logout" style="margin-right: 15px">로그아웃</a>
+ 					<a href="${root}/mypage?action=mypageForm">마이페이지</a>
+ 				</c:otherwise>
+ 			</c:choose>
+diff --git a/EnjoyTrip/target/classes/com/ssafy/enjoytrip/HomeController.class b/EnjoyTrip/target/classes/com/ssafy/enjoytrip/HomeController.class
+deleted file mode 100644
+index a63ccce99d56f921896490df3dd85bf5819fc3c2..0000000000000000000000000000000000000000
+GIT binary patch
+literal 0
+HcmV?d00001
+
+literal 1659
+zcmb7EYflqF6g@**TFQ!85JeO#qEbLs6kik{2%>1wL<z?DY1&T9;C83(PElg~G5!M|
+ziO<9z;EyuinQfp})JRfxXJ+rY=bn4!e*f|18-N+CB+<bzQc^WH40&bC75;|W(t)hI
+zw^dCnC|?K4^F)wDoS}DvZ*te;e$~BS+z=(r(CMjaRRj!~f(oi`=v8Jm+=AW9Go<E9
+zp7f=@$`BjNtue$GR9U3ajXg;?3<ug{mUv04V9P-d_A+!;g^sWoPK*_HvM+c%4D-3)
+zQ+9!2pMwNC8TJ;WFYYyJMG>s>q9-iJ68F}4AkDhD**Rw!rV+z{gMOrlrCygI!)W2(
+zx=@kvbyA99u}QF@rAG=-B9V^>)&uERD*>;G=PG#WHl({kDtN?yr=o|XxnCu;!3Par
+z%bHk|p(K*?zOOXbQu##a(yn;VMbRxvzwGkuZ`}vtSwn<+h1cs5Y+{pp4Pwb$>RC<b
+zbya4#_}_RokXXiU-CRxKIK#<D!XuSL)`)N{ySgs2)N<kLtY;<2$}s!#)l@f5;8YSP
+z$wTcecQA$=sVM!5VmQ^>=B6kuGDWt_=hl*#VCb>>S-}^%CSQ$XAdM-UNrKAkx2IaX
+z(5^XMQbCPt2h%vq&_~WPo2#VsvL9;hmq?t+vE}6`S!)xUZE6F`n?y4X&f@|pTCw0{
+znN|~+1iLjkg-Z<SPz0OgOd`;YS<EFtvL3eL{J}2{u7EC*!^`D)O?D|Zbc^lmt^BiK
+zyLNipi75=)t87ebuE~zBO(QcTYR0n+!+%GjMwY2;>T?T-6@p4OCs7+12BPzJRT=g~
+zT53@?VcTq4>m#U#su7gLk~Dn#ejQa)hCRc?u0%sE0-^L)UAQ~LEstX~H)1pq84j7@
+zL2ognkfa|?AzJ0=Y5ux0>=V-O(fgJb9mvrCPJ7gkKD%QeXofVyTzZ<o#P~<-Zx6}X
+z5GVQo2XK%+r29_{Ixs}<2WfSf-j6&13o(qN^c2VvSHtKvF*H1<-=Q}%GVvLsF?_}N
+z<ByoU7mrVT!s*%gVEpt4oSRKdW-bmUKI3u>k22TZP*BADkOdf`X?%pJ3{%o9j$?#;
+zJ!+|4jS@7eQ7T-=yrnyh8(1I|6Sat&L}dsASi&vD384qKu}m^{;Ev68*Op^+DgZwL
+D-&?KR
+
+diff --git a/EnjoyTrip/target/classes/com/ssafy/enjoytrip/home/controller/HomeController.class b/EnjoyTrip/target/classes/com/ssafy/enjoytrip/home/controller/HomeController.class
+new file mode 100644
+index 0000000000000000000000000000000000000000..ae304efb676ffb83561ed07ae9ac26671de9d15b
+GIT binary patch
+literal 1699
+zcmb7EZBJ846n=)bw3I8bg+&pTt?v|&5tmh$qAm-f>=rgrf-!!Yw$n1~?VWn>6eY$V
+z<3G?f@nuc?0sbiCnYj&gE1KA(cV5pq&w0)>=i{gUJ^)z2W*R*Vmn*u#qe#^DxeRvo
+zz6n*6@92i)6&;vR`@RhM9a^s(EYnCb4DE_N!F>_b`QPPTSuqT~zOL70$dD`Pu+AgD
+zwy?`fZm-CYS*rLdQ04|hVydvskX+GKnMFU2rQtCg@3vVJ6{Ev_4+9uv=&MT;`(ijZ
+zRXU8m;)^IM7QPJG2ZkR!q|nPSSW<!9Y&FU<+!AG9I*b+JZ;Mdbb$hdS$sx=lfl&`5
+z$Ph}iqaucd()aU3Nhd9n46ALxEu(y5gaXTA47eGppk50_Lq68wKfI;*2C?E(K8G3J
+zqnZSD@-}w26&Tf!+bU87dN~NR5k~2N0A4%N-(y+kWffGpIJnF2%1133nGMlw#%@!4
+z!fz2u#;Jx4X?Ap#;p%t$bB2U6ar@R*24@(~-<LkICi9krQ~9kOnI{Rzz~p^LL0(1q
+zr_bj4aSj*KI8U1DmVk#T6o^F?)HK6|&a$^j>7Xf=VX?5C#tg%N<IfSkDh%mt8lzdv
+z;Zhou=7>8r@`>U0bWMj1VLZ&^GQ%(_&2DZH)9XQGL{K4eW~bKI<6xadY?rCaQPBok
+z@bD|H5TiBcoZ)Pz2yB3(ik!hUhHNCmJyI$G=*J?K(jZzV964Xni-+r=hvkWCb=i<y
+z$}Q6&JNHVzPS}x^K2Tx?zcZvrL-L7x;#R!&`5f}w7Bt;zSnV=Qe%m7zv`Xnyy*r#Z
+zLMU~65|@KvG(PWUm*H5<sgYG{c7UccPjYonx5A2CQx@;=|6ACcMb9vEB+$snP-?T^
+zl>D&i6>*CCNrE~j!%5pzXqG?*Y5G%lqE&%L`|HcGx5&Q2&`VnMAV=R`cQk@ww_{yU
+zZ)uxx8m(b!`VD^UHpw{?FTQ}|I6)Vw4-kSLjMMxCttM#x(?hTbllYlNi9BJoh@KNd
+zi*x>84CPMGyu;Z9-edZ~8_aGdlQVB|aWOfTy!aZwET(32SI1KC@LK}+b2nd*QH=bg
+zb1+6-dYqt4(03AND8L*}J7_oJ0BvX#3d{Jz!JWqnR>{jSS=_=JK^ey=ZsQJ;<Y55o
+T_>*Yt!Cx*`$)#g?+5kQSm5039
+
+literal 0
+HcmV?d00001
+
+diff --git a/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/controller/MypageController.class b/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/controller/MypageController.class
+index b2b619111f1b70da5eeaa938ed9a6657d33e3e1c..ccf51a8b8f159f7a91860c12b358e680de00968d 100644
+GIT binary patch
+literal 4560
+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
+
+literal 2367
+zcmd5-?M@Rx6g^W)x0E6ZBH{-uDhhsd{UH7jV?qcjNl{ZijPZxr?hbUw?#?>9E%Y^f
+z852$PzmMR<81HUtsqMNkfQdhLcJ9p0nS0Nid*|DaPhS8m;(>+?!=fc!BM8i$rop{E
+z*$kENje5Y9VM#Ak(s5|I-t^5~zS3FHkY$+OGaKfCL9Pvlhej<7ed9R|8?6O~;Rq(O
+zgvA*~%3Fu#5<~8>@I?58VPJk?n<2X*ZLVRMVKl-u9Mju1R+W+}j}gYcZ+VIb(rIv8
+zr-*&wn4yrK?kib!xEnmu3qzYVt_#<fDvVr8aZ;ry2Hi3}PlkGx>%Tz$t#?<Z31{n}
+z)J;8X`n)jI<+<kiPJ;JuJ_-B1X#bN-`|{I6DxiSTA~c+4n3yjg-u?z@(c4{$)G=BX
+z9)D4Ht6XiGbm0tRWoentwy8v9w->WvO#}=N%SRD4X)+s0lA*AAU~xavSD@j1pVFhO
+zNbwz~JT5TIrVEtxNs_naD;dxMl~$U6E}ja1U*|!%6tj`$7Wfn-Cyq2sGmOXN32Cgo
+z>_o>fXv=4uPR+T}7CX&6t}uK^4>zu-E^VgYV65U}yAbdDBCOfU+&3Kt>%=+gmsTFv
+z|DK9tC)i!=>0k_b#ciRuMb~DZG!gwgL?x!}NVRV&o33F))|JJdim1*edV7B<(ip>3
+zrS65o<=Y|<RDjD-gN<7<)!$r?Y~$`5ZyK+8wOu|`Zi5ZesnZ#n;l>Y)hI{mCbjgmP
+zxGsW#y1*uN%K)>W=Yk$Dh71OgqgkHjT09QLkJ<p)K;bhAZ^nuraq25s8JwXp7w;4?
+zM)P9J3*$IT79~jt8JweemaIwiV@)MsO(bAtaS@l=SULJn;&KNqio6wB653QE+RPEr
+zW)jdc&<Twt#50?a-EtzrRa{F%m`gyYBqH3vd>7Y;>||5fd6$T_(822EIvveQKpVhK
+ciXekqxK004l;s`zN^ije7`RVskv8uB1eeow9{>OV
+
+diff --git a/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/controller/UserController.class b/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/controller/UserController.class
+index aede42de5d05d784225b63fbb7c427648e8c777e..4d259c6451d178183967b9128be745c8012bee96 100644
+GIT binary patch
+literal 4751
+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
+
+literal 3203
+zcmcJRNlz3(6vzKH%+SL)fPxz?*r+JD&@Q+Ek{IF^$0cmWcxt-Kp|q!~?dk#f1l~RS
+z8N8ZkqMo_<RXlh$zUmo)NDU5T457QK>&>s;d-axD{q^Y!fKg0Z$S_>;WW`a+eX-*3
+z@TFWyVi7r2#bd{lVG_$Apy3?Nr`DzxvJCw%-6i*pLkmj*Pn^XhiJW`%n5lhW*rg$Q
+zCOpp2S<;O9bezFbTqz+#2D{XdluD3r`-BKZGRe?3G(69cosvGc(8<uPf9eEoSaxp5
+zv5fQRW|{AEVa$~bmbh<|aghkzgm$u{SS|#-qQ>k($Lu1vMJ1APqD4kh`$x3Gw&#YS
+zOzZ`2|AG8p=?!i%>}@B~cI{*(;)RYKN#3tSfq}bSngOwM)mjRxhg1{H)`+xpzouXX
+z6tSm>4)ieW8%ndK7V<Nct6_Our$l#2g#1ypvcTh6m!h1ZrzAZ$n0I5L=k<@-WKk%F
+z(bD#lp3*R@vyh>1`;EsVol?rep-q)Q+e8&%O(>5e3{ev~+0yu?qT$OYQjxyXHJ>%E
+zRnz=+m8)dDaUn`An&v7Zn>jh$g3ZvI79Sy<`;Rvmdz@ilYh$VYFywrBmy>e&Xn8L3
+z-GoleYq_4AV<nH%3=jUPU-Pww{2VRc5uu;Q83wsEIW4{Vn43t&rc#4;7rx$|q06sE
+zf$+$aQ;XbtMV^g$S*V0lQ*apGwNA4ZDj&$QtWp%@XdtK;lFq(}xksP;R!76;V9<rb
+zdLiRwHzo%bW@I(?_#L6EN3TAm^^QNHL!F^-x*8^;!smq&R8(&1PMP*rswsniWl!2h
+z(?#bgU#J%aDk8ZhH>lDMx%84@VS;W78#14v_)t*a56iRE^b`g_U7xNi8T!kiJsnxd
+z)4P*aI#8hJuJk(7MkAo`8O3KkT_3UgYbx7I&-Qes8+&P7tVv-X_S1~v01+}cNaHNc
+z`V6eY2G$`1D~qG(ud~|e-G^gqG;KjmvjGFG-$*;LL)xH$mcdC3l6`+XwXV-8gFeDY
+z7-~QmHV~GLgtKIkNe2_*t&wo9fet1s-Wv($8xTeeR(voLE;JyRPWGFTaIpcw<cC!w
+z;Sw%yh}!iy%WfHGKa8x=HP+uzyEW~nf!2mAq(KH(agE+xblTVH|HgALg)!WuZ#v7y
+Fe*>Y&J0k!9
+
+diff --git a/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/model/dao/UserDao.class b/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/model/dao/UserDao.class
+index cd85adb38b8c365c35e1041e701e33c72dbe6273..2a17afa8dae013aab161bc02a419502d63af20c6 100644
+GIT binary patch
+delta 243
+zcmX@Yv6z+X)W2Q(7#J8#7{n)Xd2q4j<fmumF*0~-OlD+OW%QXSATJtPoLXef$iU@V
+zk(^pkl9``Z%+A0$S(-_eSwjP)V6ih3V?7%q10w@7&>#i|4i-iRRt7d8pB>0!0n#85
+tE(UHi5grC!G!Z@wUHlj#0t|v^x`coxtD{;b%piiS2*?%%I)#Zr3;^g%78w8l
+
+literal 1092
+zcmd5*O>fgc5S=Y)oS4v*K=_6(Uu{yM_`(HRaVbTr6uy+S632}_q#HI~v%4wemmz@!
+zcYYKw8wZLKA2@QcJ#S~;Jipob{^Rpk0C)&n0jx0Cj`cXQR=k}?n2z++8JR^BizXWD
+z1XYv>9UW5mROkRo4Aw{DL_|uY!|3H;gt22#*^QM<rF+8QOsjpwptMJ&0aO{(PqX)p
+z(WU}t8T>p<4O*>EFyYialS(+LQ=S<;P&l@ad06cqBbVb$8|PCxGl3m1i^n2Owc`Wi
+zze&QX7g%t>o#ukOX@>t*N(dD=SA#XEGbr!Qoolwbr(X4F3h8jids*+w6kkln12la>
+z_AqF4bu848Fw)0!a8>D{Oc^{VpeZ2kddGGcg!><3%)I+HfJ+RTGY$5=ih8fRf6i#c
+z28Yr*Gz_Y(yx5CdOD36;v2eI|jPW}Ln+5IL%l(PaqN2-lkdTJ_(<>r;k|jj<>H~wV
+z0<LAM_5m@_MMZ}>Lzpw<!J~iTC}5?Z3wwHEVtgjO={3(sJJ9h41#q7(dETM+Tv|)R
+z>eDT=Wd^hZv|RvI8uBWXDGn&wo}=LxsJv-}pP=@Q&=pvxr_TY(JwHSIjy2!{VHYVb
+u(Yr~=Ww^3{T!m{3$n~YF8%xMdxV2EVvBb>b_TM?A^3F`zUD%u}y7vpwwHrkM
+
+diff --git a/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/model/dao/UserDaoImpl.class b/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/model/dao/UserDaoImpl.class
+index edfb1b1483c4df17bdb05cab2cf00364090e2109..a061ef928c00295b7054ca1a65e12aea63507751 100644
+GIT binary patch
+literal 4417
+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
+I#`PNTKX5GID*ylh
+
+literal 4024
+zcmd6qS#Q%o5Xb);LgJ*QEiL!yay2Os7bs`Bk4lxor5+Mb$Z?iri(?ym15|tnJ_26>
+zo{&I-XL#q+AR%Vs9!M<BA|ljEY3z9RH~*Pg&8)xv`0xq9ByQ%BVW@av%SjUV$&$l^
+z#c)Z+B68XZkDXRn=e|>SLua0DZ@b}4EAsQmG7K%c&t1oNgNAdzw#Yr1M~-3KoWx*>
+zAdzn1afTCB^Mz9knR<<uS8v~(m%^v}++`66d6i*Psl33Dy+yL~7-Se+Q+X$j!`Q-B
+zmi;~-#5@W8=e%x{+erAX6k%XTaai+tE4gGB3v*3wi&hlIQkhgb$*HK6*q$2%p|oq<
+zUV;3{nza4VS}sN0{w1e&tDQ*Ykp%ES+EV!snmiVgRJyf9#;zyr7MIPizOt|q^M*(y
+zk4uVFPIdH#Ol9YiE9?q8O|~W=TZXo4E4RhMzZn$^%3&85y)iKoYT(L<V`OCDtT!e`
+zYK)BjqaFiSMv{AHwDA;~#8$)rM*7i*Z4BE>)wT9GOHDs$OsV!cSQP=k*KXB#Jm*qJ
+zWEif7p6f5Tu~7HRKW1f9Bn%UO(Yn?2pmyEY;BscQ_g6~gzd%e`*vBxseha4#&al}J
+z8zP|Dq6t$IcvTgY#1-$n^mwEOLXyWQWvP>+<eBfxKCG@jvv8Q<?fNP@gT!E)^v1-b
+z`ZP3GMg~Knl!jbhurS83*qdO?WDL~XkuN+~@>@;rJ!LqiDN_0ODp@$rFulG~HNMSM
+zSP4xzPtMdWR2aUkkKK6HG>o#CMyYn0g;W1CPLnE_jC>OgZS8hcrw#Ss1;dzTH~qeu
+z$}<+uGWZ5{H&I|(j<uteg$oR?4cr@ah+Zm86RDgsTr^6hCb=|7inC!m_V~0=Gh|5d
+zmfs*Ms;A~b2lia5JCEyhY)?J*-xWzhvuKV^lnF*br+WHqMg~RXVbOa_1_inXeKIu3
+z`swMG&fAQ#qhCK_;L-5VdklZ>*lwr)xy};{JLp>3tF=3^i@pokjXleRaq^`8Qo>#h
+zVWdOIkPX9r93cM(={iey_NoTONC}5Dgxwkq3`cNO%Tk_F)-erhQp+l#+=Vr+VLi~Y
+zPIQg&q=xla%W}H1CN!*9TGnZt(Z;xz`$-M!jh1z;Ywpi$Snsr~i@2oKm0hi)PS+O=
+TD}yOolfh-&pzj=AUBR`VVxD)t
+
+diff --git a/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/model/service/UserService.class b/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/model/service/UserService.class
+index bc6f93a34de8fd3a13168d0258a13fe739b1f450..a0d9f3ba72bf72b49ca57a2863b180b34cf5037e 100644
+GIT binary patch
+delta 243
+zcmX@Yv6z+X)W2Q(7#J8#7{n)X1#q$E<fmumF*0~-O#aKH%IGsuKwdPoIJL-{k%7y#
+zB0067Br`v+n4N)hvNDr0vxWvp!DLUSU-fK^42%rSK!X?<I9M1NSQ*%We0Cs@1xSNL
+txEQ$6M0gl@(M0$#bn#<|2rvku=@J5(td44#FoOuPA|P87=oBUfF#uvc7!d#f
+
+literal 1092
+zcmd5*U2hUW6g^WZ3o8~%t>4;JYYWD(iSb3-_|mkA3F-sT#K&QG3WLkeW_AGiWhR>F
+zyFW_311JsbgO9%K-h1ZWGiT1+`SJ71Hvlhi=wO54d7y@Vn(~XOFXDlk8Z8rllnU(+
+zRVX5#qOlBw-=Uy2j~(O~Dg!>|e#GOR|GqmAfng{d2a$}WdChR8RzGLRoe+hCB13su
+zeX6z61zctL)rqx8RWuf%M=BB-aU)giC0cbOF-%{1Zn51Lo*X7h8(Y$t32j(;Uclp6
+z8Lun6KO}C^ip*H>jPkf=riu8kN?a6ht%NO<8S=*q=XPt&rB^MwjktGYy(~9nEZ&WV
+zU7_2Y>|v-jRluWjuBFWv;AW(HGG=&|L6bq;w2mDyxTl{2ky!Ur2R9gYmKy%9&;@JJ
+zlc^D!p;()@T4`J1D2ZgijX3Fx;3LC9#^&|)-RaaaJd<%qK{A;Kg=Er6LZV_g%wSn3
+zslOrh6KVRP<`W(f70s=@m@>Tlr~V8^I+EK`BOQn{X^pO2n*D|~#=#RBZi_OM-pVwk
+zOKQ_}rFjOLeR^F$kuG-=dCDEio-R=LD+(W~?q`&~6S{#4eQgbBeS3!3w^hXsVb>|o
+t(SMhao4B=t+{T?1<nCJ6y*1=M9;|fjtucFec)5mDKAI_ejDv-u{ol@@8_@s&
+
+diff --git a/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/model/service/UserServiceImpl.class b/EnjoyTrip/target/classes/com/ssafy/enjoytrip/user/model/service/UserServiceImpl.class
+index 2ffc536fbe8e64c7939d8ac2c8ab9a1328f537fe..bac7649d0dd384e0a75f8efc632e7f6f6563a7d1 100644
+GIT binary patch
+literal 2091
+zcmb7EU31e$6g_J@b|T9O1qy`kmIAhupb{X21_%%cr1i9&20X)~VsD%cvZRq@O#TxO
+zFay&`ANm9MQ4D7#$7WDGHV?M<<KA=6J@>3Xeg5x%05|chfQ-OW!)se%Xm9UX(%tp;
+zqCojpCzOHJ_L|bMxO%M`(t5$gX0qOB`%VElfg`*2Yuj>cw`KjcwJRG@0eOMN??)6U
+z=#r0ZPhh?_BEM;SF&jp&2;}c7S4H;)tn&9HR_X$|HFjtqi;{^cObcYomHHIemx%%<
+z1!ii>m49~HTQYcVZ#h!nXw7TbPTdZa-uDi3(T)lQmPgeeA|;!caJ-gs1^y`429j=a
+z6mDxJeNq`!NY9F>#*;S<=|{?Q!vbanjt#K;H$|MmxdP4#RL7Uy#E&>3kWo#o$N;s+
+zm^Xe`U^0*`6-F`;D36>?Ou16mbbc}M6Mp7+v?T;CkJ;^Xv*SCeVMlUpM>bvwTscI{
+zN}8=MSv7GLWtvGf*OlAUM++vd=_V&b>Co95Y&GZFZF*orwr%Aw*zX<$-!S=}7;GfL
+zx*2Br-4}k7d<3o@LM6?lvY`tvo4A7|rg!4xzo}&2x5KbY21Zv!JI%oE+KvvrXX3tA
+z%HTtlkxa_w`EJ$rp1_^4iXK8Ep28y&Yj{BHghqmGY<iubA=j0D3&-`@=HM^knl^&K
+z>^~hhQf*mRq2e2P=(=8H$0no?YF^N?LSGwuJD{3fFL-5Xk4P`t^QF~;TcHE^9Qm2x
+zC!=2@|FWjInu5WTB6sWDW%z4U|Akqd`-qwM+-2|szo(h2zjK&j#t|Il?nDxeV>r$o
+z^I}v%G@6-rCwZ3R?o^EaI}tR7S^a>Sx%qvZ&f*>S34We&Adbepn8fvQO`OMt_}=8*
+z1!f5C=TwC?o@oBXxWYazWiV*Kh_7Zz^7L2ai~S-+T*egw(^@E}pjW?vu4Gc&&kuo3
+zxC_jUqse?)lS@N1vHF_)+SBCvI29Jt70N>@3{*d;a0^Q*X;O2&oyFU4=DIMl!f(AE
+zR>qj?-Sk`+IoBIQ25>OfRXj+Me@TPpNVb%ia$z42b1Bo@hKc1EyqW~}O;hSSvjja4
+X?Y<JUT3N0i$0|JGy8^Vop8{V1wFRFD
+
+literal 2864
+zcmd5;T~8B16g^W)w=D?Bhl*b;qR=9C6%kR4FA9dF>H{B%kJIhY4s3TfyHjd^nTbYy
+z_eUA;w1pZO5gIf$+3ww)JLjHzXXf1f_Wk1*083c0kYHGLgPIe^e7ETce=lgNNQO>5
+z7Lij6%EEKVI*_h#w#nFR+Z(mevyfyM+2aS?@wi`c-j?=+t1P4#7SE2zkd}U|xbF&v
+zrQ+EERv9c!`Xvt-GDS_6OnRGoCVi=%GxX*1I}FJel$3>GhT$&vwI~XrG%m8f&)a?^
+z;=nr)Wt&KZ(&I`7z8ywE$rH8ssh!PiRfR2UVGt?pQfQT~pkv!E_x(WGC1D?e{C#iL
+z42Av6+Ss*vtTacWEPQ1v&DgJsNGi&UmtqxhSJ^e8szLeZ$%Teg)pEoe+{<aqe4GFI
+z#)w2k#!5to5jtySsGh9?o7*~iHghH~y+I9lZ4|>mZ-LGYh<55JuukFfkAeQTa9Ipt
+zY!Cw&XPC$py9a!eM9r_PY5^E7N?*LG*GeMV;&i4NMvH;Vy&WD&{oHw(R8<)>tn?s7
+zdh?O+3{-^LIMTG`T)qdW)ika%OrI=Dq)80@UQm%f!-64gLm^rMNhGst?_CjUiHj{v
+zGmLd>b~KX448#7(99qJtkLY=9QfdZ=8bMl~Yjf3WH&m{No^-hqFRH@bXP7l)n?Igz
+z8hM6SCug9Q{Ztx5Ek%~srC%l^Y_yGZ*w_xs#EW6hK<PN6{07y&E4Bnh%~tL<8J?VK
+zz5$WylidvJkt^1v-qzzfo6T;+F6gDTutYsjk62iymf6XeVeqw#V>%;SB(^c8LH&}h
+zek72Eg*1IHB#<E+bS3D74btd^)>nk~qqm<h^lo(I14h5Ld?)BX)f(x;C9<`@o_iTr
+z=$^qOu67XSDU$xR5v~~!hFb^;@?p4vn-qVF>?A$eM;tUp8{w7#Vcfuh;Wq9Vv2>*0
+zV@(>dW-<2%tek<@lo4ybryOUDSa*BE${Dd1aL<@yxAvwS3r4I$Pqkk(VmY{P<dr;H
+YM-#6V16BeLXifr)cue;cSr75(2Z_J#NB{r;
+
+-- 
+2.39.0.windows.2
+

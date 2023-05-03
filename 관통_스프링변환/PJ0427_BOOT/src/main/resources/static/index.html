@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+테스트입니다.
+<a href="/move">이동</a>
+<a href="/main">메인 이동</a>
+<a href="/api/board/list">list</a>
+<a href="/api/board/info/1">info</a>
+<a href="/api/board/write">write</a>
+<a href="/api/board/delete/1">delete</a>
+
+<p></p>
+
+<form action="/api/board/write" method="post">
+        <label for="subject">제목</label>
+        <input type="text" id="subject" name="subject"><br>
+        <label for="content">내용</label>
+        <textarea id="content" name="content"></textarea><br>
+        <input type="submit" value="작성">
+    </form>
+</body>
+
+<p></p>
+
+<form action="/api/board/update/{userNo}" method="post">
+        <label for="subject">제목</label>
+        <input type="text" id="subject" name="subject"><br>
+        <label for="content">내용</label>
+        <textarea id="content" name="content"></textarea><br>
+        <input type="submit" value="작성">
+    </form>
+</body>
+
+<p></p>
+
+<div>admin</div>
+</html>

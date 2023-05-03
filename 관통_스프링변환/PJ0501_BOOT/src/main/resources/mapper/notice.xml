@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.enjoy.trip.mapper.NoticeMapper">
+
+<!-- 
+	List<Notice> selectNotice();
+
+	void writeNotice(Notice param);
+
+	void deleteNotice(int noticeNo);
+
+	void updateNotice(Notice param);
+
+	Notice getNotice(int noticeNo);
+ -->
+ 
+ <select id="selectNotice" resultType="Notice">
+ 	select *
+ 	  from notice
+ </select>
+
+<insert id="writeNotice">
+	insert into notice(title, contents, user_no, regist_date) 
+	values(#{title}, #{contents}, #{userNo}, now())
+</insert>
+
+<update id="deleteNotice" parameterType="int">
+	update notice
+	   set remove_date = now()
+	 where no = #{no}
+</update>
+<update id="updateNotice" parameterType="Notice">
+	update notice
+	   set update_date = now(),
+	   	   title = #{title},
+	   	   contents = #{contents}
+	 where no = #{no}
+</update>
+
+<select id="getNotice" parameterType="int" resultType="Notice">
+	select *
+	  from notice
+	 where no = #{no}
+</select>
+
+<update id="hitsRateUp" parameterType="int">
+	update notice
+	   set hits = hits + 1
+	 where no = #{noticeNo}
+</update>
+
+</mapper>
